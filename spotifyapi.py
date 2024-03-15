@@ -1,3 +1,7 @@
+"""
+This python programming capstone project search Top songs/tracks from spotify by artist_name
+"""
+
 import requests
 import json
 
@@ -5,11 +9,13 @@ import json
 CLIENT_ID = '5e8de1f6a4bd4ee3bd513f09b528b788'
 CLIENT_SECRET = '88da4a7cdcc449f0ab98b9657e7e7c96'
 
+
+
    
 # spotify api url
 AUTH_URL = 'https://accounts.spotify.com/api/token'
 
-# function for generating access token for the API
+# function for posting credentials to spotify to generate access token for the API
 def get_token():
     auth_response = requests.post(AUTH_URL, {
     'grant_type': 'client_credentials',
@@ -20,12 +26,12 @@ def get_token():
     token = auth_response_data['access_token']
     return token
 
- #function for header authorization 
+#function for header authorization 
 
 def get_auth_header(token):
     return {"Authorization":"Bearer "+token}
 
-# search the artist by their name
+# Searching the favorite artist by name
 
 def search_for_artist(token,artist_name):
     url="https://api.spotify.com/v1/search"
@@ -39,18 +45,44 @@ def search_for_artist(token,artist_name):
     response_json = response.json()
    
     results=response_json["artists"]["items"]
-# Return the artist if exist else return None
+
     if len(results) == 0:
         print(f" No artist with {artist_name} exists")
         return None
     else:
         return results[0]
 
-         
-        
-token = get_token()    
-result = search_for_artist(token,"boyz")
-artist_name=result["name"]
 
-print(f"artist_name: {artist_name}")
+# Getting the top tracks from spotify for the artist
+def get_tracks_by_artist(token,artist_id):
+
+    url= f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks?country=KE"
+    headers=get_auth_header(token)
+    response= requests.get(url, headers=headers)
+    response_json = response.json()
+    results=response_json["tracks"]
+    return results
+
+         
+token = get_token()    
+result = result = search_for_artist(token,input("Search artist name: "))
+
+artist_id = result["id"]
+artist_name=result["name"]
+tracks= get_tracks_by_artist(token,artist_id)
+
+# printing top songs in spotify for the artist
+print("-------------------------------------")
+print (f"Top tracks by: {result["name"]}")
+print("-------------------------------------")
+for index,track in enumerate(tracks):
+        print (f"{index+1}.{track["name"]}")
+
+
+
+
+
+
+
+
 
